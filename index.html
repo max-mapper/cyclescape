@@ -16,7 +16,11 @@
   #panel { position: absolute; top: 12px; left: 12px; width: 320px; max-width: calc(100vw - 72px); max-height: calc(100vh - 64px - var(--strip-h)); /* clear of the credits line and the strip */
            overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; background: var(--panel); border-radius: 10px;
            padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,.45); box-sizing: border-box; z-index: 3; }
-  #panel.collapsed #more, #panel.collapsed #prefs, #panel.collapsed #notes-box { display: none; }
+  /* collapsed (desktop): the header, the status line, the mode toggle with Undo / End / Clear, and one summary line */
+  #panel.collapsed #more, #panel.collapsed #prefs, #panel.collapsed .search-row, #panel.collapsed #mode-hint, #panel.collapsed #route-opts,
+  #panel.collapsed #sum-det, #panel.collapsed #sum-sub, #panel.collapsed #act-row, #panel.collapsed #sum-warn, #panel.collapsed #box-card .hint,
+  #panel.collapsed #lod-chip { display: none; }
+  #panel.collapsed { width: 300px; }
   #handle { display: none; }
   header { display: flex; align-items: center; gap: 8px; }
   header h1 { font-size: 15px; margin: 0; flex: 1; }
@@ -27,10 +31,10 @@
   #retry { margin: -2px 0 6px; padding: 3px 10px; }
   /* keyboard focus: one visible ring everywhere (the planner fields show theirs as the accent border) */
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .trip-in:focus-visible, #map canvas:focus-visible { outline: none; }
+  #place-q:focus-visible, #map canvas:focus-visible { outline: none; }
   /* Japan | World and what to compute: the two switches that change what the whole app does */
   /* controls that only mean something in one mode; World hides the Japan-only rows */
-  body:not(.omni) .omni-only, body.omni .pair-only, body.omni #trip, body.world .japan-only { display: none; }
+  body:not(.omni) .omni-only, body.omni .pair-only, body.world .japan-only { display: none; }
   /* analysis box (Everywhere ↔ everywhere): size and download in the panel, handles on the map */
   #box-card { background: #1f1f26; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 6px 0 8px; }
   #box-size { font-size: 17px; font-weight: 650; color: #fff; }
@@ -39,39 +43,38 @@
   .pt.box-h > span { width: 16px; height: 16px; border-radius: 3px; background: #ffd166; border-color: #222; }
   .pt.box-h.move { cursor: move; }
   .pt.box-h.move > span { width: 34px; height: 22px; border-radius: 11px; color: #111; font: 700 15px/18px system-ui; text-align: center; }
-  /* route planner: From / stops / To, each set by search (GSI) or on the map */
-  #trip { position: relative; }
-  .trip-row { display: flex; align-items: center; gap: 4px; margin: 4px 0; }
-  .trip-dot { flex: 0 0 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-sizing: border-box; }
-  .trip-dot.from { background: #4cc9f0; } .trip-dot.to { background: #f72585; }
-  .trip-dot.stop { background: #ffd166; border-color: #222; font: 700 9px/8px system-ui; color: #111; text-align: center; }
-  .trip-in { flex: 1 1 auto; min-width: 0; background: #1f1f26; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; font: inherit; }
-  .trip-in:focus { outline: none; border-color: var(--accent); }
-  .trip-row button { flex: 0 0 34px; padding: 6px 0; }
-  .trip-row button.mv { flex-basis: 24px; font-size: 10px; }
-  /* many stops: the list scrolls inside the panel and its rows are tighter */
-  #trip-rows { max-height: min(48vh, 440px); overflow-y: auto; overscroll-behavior: contain; }
-  #trip-rows.many .trip-row { margin: 2px 0; }
-  #trip-rows.many .trip-in { padding: 4px 8px; }
-  #trip-rows.many .trip-row button { padding: 3px 0; }
-  .trip-in[readonly] { color: var(--muted); }
-  /* a leg between two rows: its length and climbing (click to select the leg), and ＋ to add a stop inside it */
-  .trip-leg { display: flex; align-items: center; gap: 4px; margin: -2px 0 -2px 5px; padding-left: 9px; border-left: 2px dotted var(--line); }
-  .trip-leg button { background: none; border: 0; border-radius: 4px; padding: 1px 4px; min-height: 0; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-  .trip-leg .leg { flex: 1 1 auto; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .trip-leg.on .leg { color: #ffd166; font-weight: 600; }
-  .trip-leg .ins { flex: 0 0 34px; color: var(--accent); font-size: 14px; }
-  #sum-loop { display: inline-block; margin-bottom: 2px; background: #2b2a14; color: #f3e19a; border: 1px solid #7a6a1e; border-radius: 12px; padding: 0 8px; font-size: 11px; }
-  .trip-me { margin: -2px 0 4px 18px; }
-  .trip-me button.me { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; min-height: 0; font-size: 13px;
-    background: none; border: none; color: var(--accent); cursor: pointer; }
-  .trip-row.active .trip-in { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); } /* the field a map click fills */
-  #trip-sugg { position: absolute; left: 16px; right: 0; z-index: 5; background: #1b1b20; border: 1px solid var(--line); border-radius: 8px; max-height: 260px; overflow-y: auto; box-shadow: 0 6px 18px #0009; }
-  #trip-sugg[hidden] { display: none; }
-  #trip-sugg button { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid #2a2a31; border-radius: 0; padding: 9px 10px; }
-  #trip-sugg button small { color: var(--muted); white-space: nowrap; }
-  #trip-sugg .none { padding: 9px 10px; color: var(--muted); }
-  body.picking #map canvas { cursor: crosshair; }
+  /* route planner: place search, how the next segment is drawn (Snap / Automatic / Line), Undo / End / Clear */
+  #planner { position: relative; }
+  .search-row { display: flex; gap: 4px; margin: 2px 0 6px; }
+  #place-q { flex: 1 1 auto; min-width: 0; background: #1f1f26; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; font: inherit; }
+  #place-q:focus { outline: none; border-color: var(--accent); }
+  #me-btn { flex: 0 0 38px; padding: 4px 0; display: inline-flex; align-items: center; justify-content: center; color: var(--accent); }
+  #place-sugg { position: absolute; left: 0; right: 0; top: 38px; z-index: 5; background: #1b1b20; border: 1px solid var(--line); border-radius: 8px; max-height: 260px; overflow-y: auto; box-shadow: 0 6px 18px #0009; }
+  #place-sugg button { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid #2a2a31; border-radius: 0; padding: 9px 10px; }
+  #place-sugg button small { color: var(--muted); white-space: nowrap; }
+  #place-sugg .none { padding: 9px 10px; color: var(--muted); }
+  .seg-modes { display: flex; gap: 0; margin: 4px 0 2px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg-modes button { flex: 1 1 0; border: 0; border-radius: 0; border-right: 1px solid var(--line); background: #24242b; padding: 7px 4px; font-weight: 600; display: inline-flex; gap: 5px; align-items: center; justify-content: center; }
+  .seg-modes button:last-child { border-right: 0; }
+  .seg-modes button.on { background: var(--accent); color: #111; }
+  .seg-modes svg { flex: 0 0 auto; }
+  #mode-hint { margin: 4px 0 4px; }
+  #route-end.on { border-color: #ffd166; color: #ffd166; }
+  /* the start / end flags (flags.mjs) and the control points between them */
+  .flag { cursor: grab; touch-action: none; filter: drop-shadow(0 1px 2px #0008); line-height: 0; }
+  .flag svg { display: block; }
+  .pt.mid.last > span { width: 16px; height: 16px; background: #ffd166; border-color: #222; }
+  .pt.ghost { pointer-events: none; }
+  .pt.ghost > span { width: 16px; height: 16px; background: #fff; border-color: var(--accent); border-width: 3px; }
+  /* the avoid modal on a long press of the route */
+  .avoid-pop .maplibregl-popup-content { padding: 10px 12px 10px; min-width: 200px; }
+  .avoid-modal b { display: block; font-size: 13px; margin: 0 26px 4px 0; }
+  .avoid-modal p { margin: 0 0 8px; color: var(--muted); font-size: 12px; }
+  .avoid-modal button { width: 100%; min-height: 40px; }
+  .avoid-modal button.avoid { background: #4a1d1d; border-color: #c43; color: #ffd0c8; font-weight: 600; }
+  /* the header's Routes and account buttons */
+  header .hbtn { padding: 3px 9px; font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  #account-btn img, #account-btn .av { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; background: #444; display: inline-flex; align-items: center; justify-content: center; font: 700 10px/1 system-ui; }
   /* GSI Pale over the red relief: a second map right above the main canvas (markers stay above it), multiplied */
   #pale-map { position: absolute; inset: 0; mix-blend-mode: multiply; pointer-events: none; }
   #pale-row[hidden] { display: none; }
@@ -131,33 +134,8 @@
   #sum-warn { display: inline-block; margin-top: 6px; background: #4a1d1d; color: #ffb3a8; border: 1px solid #a33; border-radius: 12px; padding: 2px 8px; font-size: 11px; }
   #sum-warn[hidden] { display: none; }
   .sum-actions { margin: 6px 0 0; }
-  /* the Saved routes window: a list with one row of actions per route */
-  #saved-row { margin: 4px 0 8px; }
-  #routes { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 9; }
-  #routes .box { display: flex; flex-direction: column; background: #1b1b20; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px 12px;
-    width: min(540px, calc(100vw - 20px)); max-height: min(86vh, 760px); box-sizing: border-box; }
-  #routes .head { display: flex; align-items: center; gap: 8px; }
-  #routes .head b { flex: 1; font-size: 15px; }
-  #routes .head button { flex: 0 0 40px; }
-  #routes .hint { margin: 2px 0 4px; }
-  #routes-sort button { flex: 0 1 auto; }
-  #routes-list { flex: 1 1 auto; min-height: 48px; overflow-y: auto; overscroll-behavior: contain; }
-  #routes-list .none { color: var(--muted); padding: 10px 2px; }
-  .saved-item { border: 1px solid var(--line); border-radius: 8px; margin: 6px 0; padding: 2px 4px 4px; }
-  .saved-item.on { border-color: #ffd166; }
-  .saved-item .load { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; background: none; border: 0; padding: 6px 4px; text-align: left; }
-  .saved-item .load small { color: var(--muted); }
-  .saved-acts { display: flex; gap: 4px; }
-  .saved-acts button { flex: 1 1 auto; font-size: 12px; padding: 4px 6px; white-space: nowrap; }
-  .saved-acts button.icon { flex: 0 0 40px; }
-  #notes-box > summary { color: var(--fg); }
-  #notes-box .hint { margin: 2px 0 4px; }
   #packs-box .hint { margin: 2px 0 2px; }
   .pack-row { margin: 2px 0; } .pack-row span { flex: 1; } .pack-row button { flex: 0 0 40px; }
-  .note-item { display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 8px; margin: 6px 0; padding: 4px 4px 4px 8px; }
-  .note-item .what { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; }
-  .note-item .what small { color: var(--muted); flex-basis: 100%; }
-  .note-item button { flex: 0 0 40px; padding: 4px 0; }
   #prefs { margin-bottom: 4px; }
   label.busy .ends { grid-column: 1 / -1; display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: -2px; }
   #climb-custom[hidden] { display: none; }
@@ -192,7 +170,7 @@
   .haz { display: flex; align-items: center; gap: 8px; margin: 4px 0; color: var(--fg); cursor: pointer; }
   .haz input { margin: 0; width: 18px; height: 18px; }
   .haz.sub { margin-left: 26px; }
-  .maplibregl-popup.hover-tip { pointer-events: none; }
+  .maplibregl-popup.hover-tip, .maplibregl-popup.hover-tip * { pointer-events: none; } /* never in the way of a flag or a point under it */
   .sw { width: 26px; height: 0; border-top-width: 4px; flex: 0 0 26px; }
   .sw.tunnel { border-top: 5px dashed #b15cff; }
   .sw.snowshed { border-top: 4px dotted #d6a4ff; }
@@ -211,9 +189,6 @@
   .pt.pin > span { width: 24px; height: 24px; background: #ffd166; border-color: #222; color: #111; font: 700 13px/20px system-ui; text-align: center; }
   .pt.ins { opacity: .85; }
   .pt.ins > span { width: 18px; height: 18px; background: rgba(20,20,24,.75); border: 1.5px solid #fff; color: #fff; font: 600 14px/15px system-ui; text-align: center; }
-  .note-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
-  .note-ctl span { flex-basis: 100%; font-size: 12px; }
-  .note-ctl button { min-height: 36px; padding: 6px 10px; flex: 1; }
   .pt-menu { display: flex; flex-direction: column; gap: 6px; min-width: 170px; }
   .pt-menu b { font-size: 12px; color: var(--muted); font-weight: 500; }
   .pt-menu button { min-height: 44px; text-align: left; padding: 8px 10px; }
@@ -237,21 +212,13 @@
     /* collapsed sheet = the map's: one status line, the planner tools, and the route summary;
        hints, details, the export row and saved routes are in the expanded sheet */
     #panel:not(.expanded) #more, #panel:not(.expanded) #prefs, #panel:not(.expanded) #sum-sub,
-    #panel:not(.expanded) #notes-box, #panel:not(.expanded) #box-card .hint, #panel:not(.expanded) #box-card .row,
-    #panel:not(.expanded) #route-opts, body.has-route #panel:not(.expanded) #trip,
-    #panel:not(.expanded) #sum-det, #panel:not(.expanded) #act-row, #panel:not(.expanded) #saved-row, #panel:not(.expanded) #sum-loop { display: none; }
+    #panel:not(.expanded) #box-card .hint, #panel:not(.expanded) #box-card .row,
+    #panel:not(.expanded) #route-opts,
+    #panel:not(.expanded) #sum-det, #panel:not(.expanded) #act-row, #panel:not(.expanded) #sum-loop { display: none; }
     #panel:not(.expanded) #summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     #panel:not(.expanded) #sum-main { flex: 1 1 auto; font-size: 15px; }
     #panel:not(.expanded) #status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; min-height: 1.2em; margin-bottom: 2px; }
     #panel:not(.expanded) .toolbar button { min-height: 40px; }
-    .trip-in { font-size: 16px; } /* 16 px: phones don't zoom the page when the field is focused */
-    .trip-row button { min-height: 40px; flex-basis: 40px; }
-    .trip-row button.mv { flex-basis: 30px; }
-    #trip-rows.many .trip-row button { min-height: 36px; }
-    .trip-leg button { min-height: 30px; }
-    .trip-leg .ins { flex-basis: 44px; }
-    #routes .box { max-height: 92vh; }
-    .trip-me button.me { min-height: 36px; }
     /* the strip floats above the sheet; the map stays full screen under both */
     #strip { bottom: var(--sheet-h); height: 64px; padding: 3px 10px 3px 6px; }
     #strip .strip-ctl { flex-direction: row; align-items: center; }
@@ -266,7 +233,10 @@
     body.omni #panel:not(.expanded) #box-card { display: flex; align-items: baseline; gap: 10px; }
     #panel:not(.expanded) #box-size { font-size: 15px; white-space: nowrap; }
     #panel:not(.expanded) #box-est { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    header { display: none; }
+    header { margin: 0 0 4px; } header h1, #logo, #collapse { display: none; } header { justify-content: flex-end; }
+    #panel:not(.expanded) header, #panel:not(.expanded) .search-row, #panel:not(.expanded) #mode-hint { display: none; }
+    #place-q { font-size: 16px; }
+    #panel.collapsed { width: auto; }
     #handle { display: flex; justify-content: center; align-items: center; height: 26px; margin: 0 -12px; cursor: grab; touch-action: none; }
     #handle > span { width: 42px; height: 5px; border-radius: 3px; background: #666; }
     #status { margin-top: 0; }
@@ -290,19 +260,27 @@
 </div>
 <div id="panel">
   <div id="handle" role="button" tabindex="0" title="Show / hide settings" aria-label="Show / hide settings"><span></span></div>
-  <header><img id="logo" src="icon-64.png" width="22" height="22" alt=""><h1>CycleScape</h1><button id="collapse" title="Collapse panel" aria-label="Collapse panel" aria-expanded="true">–</button></header>
+  <header><img id="logo" src="icon-64.png" width="22" height="22" alt=""><h1>CycleScape</h1>
+    <button id="routes-btn" class="hbtn" title="Your routes: save, open, share">★ Routes</button>
+    <button id="account-btn" class="hbtn" hidden title="Sign in with Google to keep your routes online and share them">Sign in</button>
+    <button id="collapse" title="Collapse panel" aria-label="Collapse panel" aria-expanded="true">–</button></header>
   <p id="status" role="status" aria-live="polite">Loading…</p>
   <button id="retry" hidden>↻ Try again</button>
   <div id="lod-chip" hidden></div>
   <div class="live-row" id="live-row" hidden><div id="progress" style="flex:1;margin:0"><div></div></div><button id="live-cancel" title="Stop what is being worked out">✕ Cancel</button></div>
-  <div id="trip">
-    <div id="trip-rows"></div>
-    <div id="trip-sugg" role="listbox" hidden></div>
+  <div id="planner" class="pair-only">
+    <div class="search-row"><input id="place-q" type="search" enterkeyhint="search" autocomplete="off" placeholder="Search for a place">
+      <button id="me-btn" title="Start from my location" aria-label="Start from my location"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22" stroke="currentColor" stroke-width="2"/></svg></button></div>
+    <div id="place-sugg" role="listbox" hidden></div>
+    <div class="seg-modes" role="radiogroup" aria-label="How the next part of the route is drawn">
+      <button data-mode="snap" role="radio" title="Snap: the route follows the roads exactly where you tap"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 13 L6 9 L6 4 L13 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="6" cy="9" r="1.8" fill="currentColor"/></svg><span>Snap</span></button>
+      <button data-mode="auto" role="radio" title="Automatic: tap the next point and the route finder fills in the way"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 13 C5 13 4 3 8 3 S11 13 14 13" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12.5 2 L13.2 3.6 L15 4 L13.2 4.4 L12.5 6 L11.8 4.4 L10 4 L11.8 3.6 Z" fill="currentColor"/></svg><span>Automatic</span></button>
+      <button data-mode="line" role="radio" title="Line: a straight line wherever you tap, for a path the map is missing"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 13 L14 3" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2"/></svg><span>Line</span></button>
+    </div>
+    <p class="hint" id="mode-hint"></p>
     <div class="row toolbar">
-      <button id="trip-add" title="Add a stop the route must pass through, before the destination">＋ Stop</button>
-      <button id="route-reverse" class="icon" title="Swap start and destination" aria-label="Swap start and destination">⇅</button>
-      <button id="trip-loop" class="icon" aria-pressed="false" title="Return to start: the route ends where it starts" aria-label="Return to start">↺</button>
       <button id="route-undo" title="Undo the last change (Backspace)">↶ Undo</button>
+      <button id="route-end" title="End the route at its last point (the end flag)">🏁 End route</button>
       <button id="clear" class="icon" title="Clear the route (Esc); Undo brings it back" aria-label="Clear route">✕</button>
     </div>
   </div>
@@ -316,7 +294,6 @@
   </div>
 
   <div id="summary" hidden>
-    <div id="sum-loop" hidden>↺ Loop</div>
     <div id="sum-main">No route yet</div>
     <div id="sum-det"></div>
     <div id="route-opts" hidden title="Genuinely different route options (≤ 40% shared); tap one to select it"></div>
@@ -329,14 +306,6 @@
     </div>
   </div>
 
-  <div class="row pair-only" id="saved-row"><button id="saved-open" title="Save the route on screen, or open, rename, copy, export and delete the routes you saved">★ Saved routes <span id="saved-n"></span></button></div>
-
-  <details id="notes-box">
-    <summary>Your road notes <span id="notes-n"></span></summary>
-    <p class="hint" id="notes-hint"></p>
-    <div id="notes-list"></div>
-    <div class="row"><button id="notes-clear">Delete all notes</button></div>
-  </details>
 
   <div id="prefs">
     <label class="pair-only">Max detour <output id="o-detour-max"></output><input id="detour-max" type="range" min="0" max="105" step="5" value="30"></label>
@@ -355,7 +324,6 @@
       <label>Steep penalty scale <output id="o-steep"></output><input id="steep" type="range" min="1" max="8" step="0.5" value="3.5"></label>
     </div>
     <table id="climb-preview" title="Resistance multiplier by grade for this rider profile"></table>
-    <label class="haz pair-only" title="Show the lowest-resistance route (white line) and its alternatives"><input type="checkbox" id="best-on" checked> Show best route</label>
     <label class="haz pair-only"><input type="checkbox" id="cur-on"> Colour the roads good routes use</label>
     <p class="hint pair-only" style="margin-top:0">Brighter roads carry more of the good ways from start to end.</p>
     <div id="legend" hidden><div class="bar"></div><div class="ends"><span>few good routes</span><span>many (safer, well connected)</span></div></div>
@@ -364,8 +332,7 @@
   <div id="more">
     <details>
       <summary>Search area</summary>
-      <label class="pair-only">Search width <output id="o-buffer"></output><input id="buffer" type="range" min="0.5" max="50" step="0.5" value="5"></label>
-      <p class="hint pair-only">How far either side of your route to look for roads. Wider finds more options but downloads more.</p>
+      <p class="hint pair-only" id="width-used">The search width follows each Automatic segment's length: 0.17 × the distance between its two points (1.5 to 25 km either side), so a 100 km segment looks 17 km either side.</p>
       <div class="row omni-only">
         <button id="show-cur" class="on" aria-pressed="true" title="How many trips use each road">Trips</button>
         <button id="show-norm" aria-pressed="false" title="Trips ÷ the trips the same roads would get if every road were equally good: where road quality pulls riders in">Road quality effect</button>
@@ -415,14 +382,6 @@
     </details>
   </div>
 </div>
-<div id="routes" hidden role="dialog" aria-modal="true" aria-labelledby="routes-title"><div class="box">
-  <div class="head"><b id="routes-title">Saved routes</b><button id="routes-close" title="Close" aria-label="Close">✕</button></div>
-  <div class="row"><button id="routes-save-over" class="primary" hidden></button><button id="routes-save-new" class="primary">Save current route</button></div>
-  <p class="hint" id="routes-save-hint"></p>
-  <div class="row" id="routes-sort"><span class="lbl">Sort by</span><button data-by="date" aria-pressed="true" class="on">Date saved</button><button data-by="name" aria-pressed="false">Name</button></div>
-  <div id="routes-list"></div>
-  <p class="hint">Saved in this browser only (for this address and port).</p>
-</div></div>
 <div id="confirm" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-msg"><div class="box"><p id="confirm-msg"></p>
   <input id="confirm-in" type="text" autocomplete="off" hidden>
   <div class="row"><button id="confirm-no">Cancel</button><button id="confirm-yes" class="primary">Download</button></div></div></div>
