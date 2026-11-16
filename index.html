@@ -16,14 +16,15 @@
   #panel { position: absolute; top: 12px; left: 12px; width: 320px; max-width: calc(100vw - 72px); max-height: calc(100vh - 64px - var(--strip-h)); /* clear of the credits line and the strip */
            overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; background: var(--panel); border-radius: 10px;
            padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,.45); box-sizing: border-box; z-index: 3; }
-  /* collapsed (desktop): the header, the status line, the mode toggle with Undo / End / Clear, and one summary line */
-  #panel.collapsed #more, #panel.collapsed #prefs, #panel.collapsed .search-row, #panel.collapsed #mode-hint, #panel.collapsed #route-opts,
-  #panel.collapsed #route-details, #panel.collapsed #route-meta, #panel.collapsed #act-row, #panel.collapsed #sum-warn, #panel.collapsed #box-card .hint,
-  #panel.collapsed #box-card .row, #panel.collapsed #area-opts, #panel.collapsed #lod-chip { display: none; }
-  #panel.collapsed { width: 300px; }
+  /* hidden (desktop): only the header line is left, so the whole map shows */
+  @media (min-width: 701px) {
+    #panel.collapsed > :not(header) { display: none !important; }
+    #panel.collapsed { width: auto; padding: 8px 12px; }
+  }
   #handle { display: none; }
   header { display: flex; align-items: center; gap: 8px; }
-  header h1 { font-size: 15px; margin: 0; flex: 1; }
+  header h1 { font-size: 15px; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  header button { flex-shrink: 0; } /* the buttons never get pushed out of the panel */
   #logo { border-radius: 50%; } /* "Bike Path" by Iconathon, public domain (The Noun Project 6276) */
   #collapse { padding: 2px 10px; }
   #status { color: var(--accent); margin: 4px 0 6px; min-height: 1.4em; }
@@ -92,6 +93,7 @@
   /* the start / end flags (flags.mjs) and the control points between them */
   .flag { cursor: grab; touch-action: none; filter: drop-shadow(0 1px 2px #0008); line-height: 0; }
   .flag svg { display: block; }
+  .flag.mirror svg { transform: scaleX(-1); } /* a loop's start flag: waves left, its pole on the shared point */
   .pt.mid.last > span { width: 16px; height: 16px; background: #ffd166; border-color: #222; }
   .pt.ghost { pointer-events: none; }
   .pt.ghost > span { width: 16px; height: 16px; background: #fff; border-color: var(--accent); border-width: 3px; }
@@ -293,7 +295,7 @@
   <header><img id="logo" src="icon-64.png" width="22" height="22" alt=""><h1>CycleScape</h1>
     <button id="routes-btn" class="hbtn" title="Your routes: save, open, share">★ Routes</button>
     <button id="account-btn" class="hbtn" hidden title="Sign in with Google to keep your routes online and share them">Sign in</button>
-    <button id="collapse" title="Collapse panel" aria-label="Collapse panel" aria-expanded="true">–</button></header>
+    <button id="collapse" title="Hide the panel" aria-label="Hide the panel" aria-expanded="true">–</button></header>
   <div class="tabs" role="tablist" aria-label="What to do">
     <button id="mode-pair" class="on" role="tab" aria-selected="true" title="Plan a route from a start to an end">Plan a route</button>
     <button id="mode-omni" role="tab" aria-selected="false" title="Rate every road in a box you draw: trips run between all the places in it">Rate an area</button>
