@@ -18,8 +18,8 @@
            padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,.45); box-sizing: border-box; z-index: 3; }
   /* collapsed (desktop): the header, the status line, the mode toggle with Undo / End / Clear, and one summary line */
   #panel.collapsed #more, #panel.collapsed #prefs, #panel.collapsed .search-row, #panel.collapsed #mode-hint, #panel.collapsed #route-opts,
-  #panel.collapsed #sum-det, #panel.collapsed #sum-sub, #panel.collapsed #act-row, #panel.collapsed #sum-warn, #panel.collapsed #box-card .hint,
-  #panel.collapsed #lod-chip { display: none; }
+  #panel.collapsed #route-details, #panel.collapsed #route-meta, #panel.collapsed #act-row, #panel.collapsed #sum-warn, #panel.collapsed #box-card .hint,
+  #panel.collapsed #box-card .row, #panel.collapsed #area-opts, #panel.collapsed #lod-chip { display: none; }
   #panel.collapsed { width: 300px; }
   #handle { display: none; }
   header { display: flex; align-items: center; gap: 8px; }
@@ -38,11 +38,40 @@
   /* analysis box (Everywhere ↔ everywhere): size and download in the panel, handles on the map */
   #box-card { background: #1f1f26; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 6px 0 8px; }
   #box-size { font-size: 17px; font-weight: 650; color: #fff; }
-  #box-est { color: var(--muted); font-size: 12px; }
+  #box-est { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #box-card .hint { margin: 4px 0 0; }
   .pt.box-h > span { width: 16px; height: 16px; border-radius: 3px; background: #ffd166; border-color: #222; }
   .pt.box-h.move { cursor: move; }
-  .pt.box-h.move > span { width: 34px; height: 22px; border-radius: 11px; color: #111; font: 700 15px/18px system-ui; text-align: center; }
+  .pt.box-h.move > span { width: 30px; height: 22px; border-radius: 11px; color: #111; display: flex; align-items: center; justify-content: center; }
+  /* the two tabs at the top: Plan a route | Rate an area */
+  .tabs { display: flex; margin: 8px 0 4px; border-bottom: 1px solid var(--line); }
+  .tabs button { flex: 1 1 0; background: none; border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 6px 4px 5px; color: var(--muted); font-weight: 600; }
+  .tabs button.on { color: var(--fg); border-bottom-color: var(--accent); }
+  /* Rate an area: colour roads by, longest trip, legend */
+  #area-opts { margin-top: 8px; }
+  #area-opts .lbl-sm { color: var(--muted); font-size: 12px; margin: 0 0 4px; }
+  .seg-two button { font-size: 12px; padding: 6px 4px; white-space: nowrap; }
+  #area-opts #show-hint { margin: 4px 0 2px; }
+  #area-opts label { margin-top: 4px; }
+  #area-legend .bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg,#000004,#1f0c48,#550f6d,#88226a,#ba3655,#e35933,#f98c0a,#fcffa4); }
+  #area-legend .ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
+  /* a line of help that never wraps (the owner's rule: every description fits on one line) */
+  .one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* the saved route: name, where it is saved, description; then the route's figures and its details */
+  #route-meta { margin: 0 0 6px; }
+  #route-meta input, #route-meta textarea { width: 100%; box-sizing: border-box; background: #17171c; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: inherit; }
+  #route-meta input { font-size: 14px; font-weight: 600; }
+  #route-meta textarea { resize: vertical; min-height: 34px; font-size: 12px; margin-top: 4px; }
+  #route-meta input:focus, #route-meta textarea:focus { outline: none; border-color: var(--accent); }
+  #save-state { color: var(--muted); font-size: 11px; margin: 3px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #save-state.bad { color: #ffb3a8; }
+  .sum-top { display: flex; align-items: center; gap: 8px; }
+  .sum-top #sum-main { flex: 1 1 auto; min-width: 0; font-size: 14px; gap: 0 7px; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; } /* one line, 4-digit climbs too */
+  #save-route { flex: 0 0 auto; padding: 4px 12px; }
+  #route-details { margin-top: 6px; padding-top: 2px; }
+  #route-details summary { padding: 3px 0; font-size: 12px; }
+  .ic { display: inline-flex; align-items: center; gap: 6px; }
+  .ic svg { flex: 0 0 auto; }
   /* route planner: place search, how the next segment is drawn (Snap / Automatic / Line), Undo / End / Clear */
   #planner { position: relative; }
   .search-row { display: flex; gap: 4px; margin: 2px 0 6px; }
@@ -211,12 +240,13 @@
              border-radius: 14px 14px 0 0; padding: 0 12px calc(10px + env(safe-area-inset-bottom)); }
     /* collapsed sheet = the map's: one status line, the planner tools, and the route summary;
        hints, details, the export row and saved routes are in the expanded sheet */
-    #panel:not(.expanded) #more, #panel:not(.expanded) #prefs, #panel:not(.expanded) #sum-sub,
-    #panel:not(.expanded) #box-card .hint, #panel:not(.expanded) #box-card .row,
-    #panel:not(.expanded) #route-opts,
-    #panel:not(.expanded) #sum-det, #panel:not(.expanded) #act-row, #panel:not(.expanded) #sum-loop { display: none; }
+    #panel:not(.expanded) #more, #panel:not(.expanded) #prefs, #panel:not(.expanded) #route-details,
+    #panel:not(.expanded) #box-card .hint, #panel:not(.expanded) #box-card .row, #panel:not(.expanded) #area-opts,
+    #panel:not(.expanded) #route-opts, #panel:not(.expanded) .tabs, #panel:not(.expanded) #route-meta,
+    #panel:not(.expanded) #act-row { display: none; }
     #panel:not(.expanded) #summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    #panel:not(.expanded) #sum-main { flex: 1 1 auto; font-size: 15px; }
+    #panel:not(.expanded) .sum-top { flex: 1 1 auto; }
+    #panel:not(.expanded) #sum-main { flex: 1 1 auto; }
     #panel:not(.expanded) #status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; min-height: 1.2em; margin-bottom: 2px; }
     #panel:not(.expanded) .toolbar button { min-height: 40px; }
     /* the strip floats above the sheet; the map stays full screen under both */
@@ -250,7 +280,7 @@
 <div id="map"></div>
 <div id="strip" hidden>
   <div class="strip-ctl">
-    <button id="fly-play" title="Fly over the route in 3D (Space)" aria-label="Fly over the route">▶</button>
+    <button id="fly-play" title="Fly over the route in 3D (Space)" aria-label="Fly over the route"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 2.5 L13.5 8 L4 13.5 Z" fill="currentColor"/></svg></button>
     <button id="fly-speed" title="Flyover speed: 1× ≈ 0.5 km of route per second" aria-label="Flyover speed">1×</button>
   </div>
   <div class="strip-main">
@@ -264,6 +294,10 @@
     <button id="routes-btn" class="hbtn" title="Your routes: save, open, share">★ Routes</button>
     <button id="account-btn" class="hbtn" hidden title="Sign in with Google to keep your routes online and share them">Sign in</button>
     <button id="collapse" title="Collapse panel" aria-label="Collapse panel" aria-expanded="true">–</button></header>
+  <div class="tabs" role="tablist" aria-label="What to do">
+    <button id="mode-pair" class="on" role="tab" aria-selected="true" title="Plan a route from a start to an end">Plan a route</button>
+    <button id="mode-omni" role="tab" aria-selected="false" title="Rate every road in a box you draw: trips run between all the places in it">Rate an area</button>
+  </div>
   <p id="status" role="status" aria-live="polite">Loading…</p>
   <button id="retry" hidden>↻ Try again</button>
   <div id="lod-chip" hidden></div>
@@ -273,14 +307,14 @@
       <button id="me-btn" title="Start from my location" aria-label="Start from my location"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22" stroke="currentColor" stroke-width="2"/></svg></button></div>
     <div id="place-sugg" role="listbox" hidden></div>
     <div class="seg-modes" role="radiogroup" aria-label="How the next part of the route is drawn">
-      <button data-mode="snap" role="radio" title="Snap: follows the roads to each point you tap"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5.5 1.5V14.5M10.5 1.5V14.5M1.5 5.5H14.5M1.5 10.5H14.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Snap</span></button>
       <button data-mode="auto" role="radio" title="Automatic: finds the best roads to each point you tap"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M9.5 1 L3 9.2 H7.4 L6.4 15 L13 6.6 H8.6 Z" fill="currentColor" stroke="currentColor" stroke-width=".6" stroke-linejoin="round"/></svg><span>Automatic</span></button>
+      <button data-mode="snap" role="radio" title="Snap: follows the roads to each point you tap"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5.5 1.5V14.5M10.5 1.5V14.5M1.5 5.5H14.5M1.5 10.5H14.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Snap</span></button>
       <button data-mode="line" role="radio" title="Line: a straight line, for paths not on the map"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2.5 13.5 L13.5 2.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>Line</span></button>
     </div>
     <p class="hint" id="mode-hint"></p>
     <div class="row toolbar">
       <button id="route-undo" title="Undo the last change (Backspace)">↶ Undo</button>
-      <button id="route-end" title="End the route at its last point (the end flag)">🏁 End route</button>
+      <button id="route-end" title="End the route at its last point (the end flag)">End route</button>
       <button id="clear" class="icon" title="Clear the route (Esc); Undo brings it back" aria-label="Clear route">✕</button>
     </div>
   </div>
@@ -288,24 +322,39 @@
   <div id="box-card" class="omni-only">
     <div id="box-size"></div>
     <div id="box-est"></div>
-    <p class="hint">Rates every road in the box for cycling: how well it links the places around it. Drag a corner to resize the box, or ✥ to move it.</p>
-    <div class="row"><button id="box-view" title="Put the box in the middle of the map you are looking at">Move the box here</button>
-      <button id="mode-pair" title="Leave the area analysis and plan a route from a start to an end">← Back to routes</button></div>
-  </div>
-
-  <div id="summary" hidden>
-    <div id="sum-main">No route yet</div>
-    <div id="sum-det"></div>
-    <div id="route-opts" hidden title="Genuinely different route options (≤ 40% shared); tap one to select it"></div>
-    <div id="sum-sub"></div>
-    <div id="sum-warn" hidden></div>
-    <div class="row sum-actions" id="act-row">
-      <button id="gpx" disabled title="Download the route on screen as one GPX track with elevation (bike computers, apps)">⬇ GPX</button>
-      <button id="geojson" disabled title="Download the route on screen as GeoJSON with elevation and route stats (QGIS, web maps)">⬇ GeoJSON</button>
-      <button id="refresh" hidden title="Work the whole route out again with today's map data and your current settings">↻ Refresh</button>
+    <p class="hint one">Drag the corners to resize, the top handle to move.</p>
+    <div class="row"><button id="box-view" title="Put the box in the middle of the map you are looking at">Move the box here</button></div>
+    <div id="area-opts">
+      <div class="lbl-sm">Colour roads by</div>
+      <div class="seg-modes seg-two" role="radiogroup" aria-label="Colour roads by">
+        <button id="show-cur" class="on" role="radio" aria-checked="true">How much they're used</button>
+        <button id="show-norm" role="radio" aria-checked="false">Worth a detour</button>
+      </div>
+      <p class="hint one" id="show-hint"></p>
+      <label>Longest trip <output id="o-radius"></output><input id="radius" type="range" min="1" max="30" step="1" value="5"></label>
+      <div id="area-legend"><div class="bar"></div><div class="ends"><span id="area-lo"></span><span id="area-hi"></span></div></div>
+      <div id="area-stats"></div>
     </div>
   </div>
 
+  <div id="summary" hidden>
+    <div id="route-meta" hidden>
+      <input id="route-name" type="text" maxlength="120" autocomplete="off" aria-label="Route name" placeholder="Route name">
+      <div id="save-state" role="status"></div>
+      <textarea id="route-desc" rows="2" maxlength="2000" aria-label="Description" placeholder="Description (optional)"></textarea>
+    </div>
+    <div class="sum-top"><div id="sum-main">No route yet</div>
+      <button id="save-route" class="primary" disabled title="Save route: in this browser, and online when you are signed in" aria-label="Save route">Save</button></div>
+    <div id="route-opts" hidden title="Genuinely different route options (≤ 40% shared); tap one to select it"></div>
+    <div id="sum-warn" hidden></div>
+    <details id="route-details"><summary>Route details</summary>
+      <div id="sum-det"></div>
+      <div id="sum-sub"></div>
+    </details>
+    <div class="row sum-actions" id="act-row" hidden>
+      <button id="refresh" hidden title="Work the whole route out again with today's map data and your current settings">↻ Refresh</button>
+    </div>
+  </div>
 
   <div id="prefs">
     <label class="pair-only">Max detour <output id="o-detour-max"></output><input id="detour-max" type="range" min="0" max="105" step="5" value="30"></label>
@@ -330,15 +379,9 @@
   </div>
 
   <div id="more">
-    <details>
+    <details id="search-box" class="pair-only">
       <summary>Search area</summary>
-      <p class="hint pair-only" id="width-used">The search width follows each Automatic segment's length: 0.17 × the distance between its two points (1.5 to 25 km either side), so a 100 km segment looks 17 km either side.</p>
-      <div class="row omni-only">
-        <button id="show-cur" class="on" aria-pressed="true" title="How many trips use each road">Trips</button>
-        <button id="show-norm" aria-pressed="false" title="Trips ÷ the trips the same roads would get if every road were equally good: where road quality pulls riders in">Road quality effect</button>
-      </div>
-      <label class="omni-only">Trip radius <output id="o-radius"></output><input id="radius" type="range" min="1" max="30" step="1" value="5"></label>
-      <p class="hint omni-only">The longest trip counted, as the crow flies.</p>
+      <p class="hint" id="width-used">The search width follows each Automatic segment's length: 0.17 × the distance between its two points (1.5 to 25 km either side), so a 100 km segment looks 17 km either side.</p>
       <div id="stats"></div>
     </details>
 
@@ -362,12 +405,6 @@
       <label class="haz sub"><input type="checkbox" data-haz="steep"><span class="sw steep"></span> Steep (≥ 8% over 60 m+)</label>
       <label class="haz"><input type="checkbox" data-layer="unpaved"><span class="sw unpaved"></span> Unpaved roads</label>
       <label class="haz"><input type="checkbox" id="bike-layer"><span class="sw bike"></span> Bike paths alongside roads (OSM: <span style="color:#22c55e">cycleway</span>, <span style="color:#38bdf8">shared sidewalk</span>, dashed = lane)</label>
-    </details>
-
-    <details id="area-box" class="pair-only">
-      <summary>Area analysis</summary>
-      <p class="hint">Instead of one route, rate every road in an area you draw: trips run from every junction to every other one nearby.</p>
-      <div class="row"><button id="mode-omni" title="Rates every road in a box you draw: trips run from every junction to every other one within the trip radius">Rate every road in an area</button></div>
     </details>
 
     <details>
