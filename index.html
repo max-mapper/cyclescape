@@ -231,6 +231,17 @@
   .sw.bike { border-top: 4px solid #22c55e; }
   .maplibregl-popup-content { background: #1b1b20; color: var(--fg); padding: 8px 10px; font-size: 12px; border-radius: 8px; }
   .maplibregl-popup-tip { display: none; }
+  /* QA notes (admin only): the note box in a route popup, and a marker where each note is */
+  .qa-box { margin-top: 8px; width: 230px; max-width: 70vw; }
+  .qa-box textarea { width: 100%; box-sizing: border-box; resize: vertical; min-height: 54px; font: inherit; font-size: 13px; color: var(--fg); background: #26262d; border: 1px solid #44444f; border-radius: 6px; padding: 6px; }
+  .qa-acts { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+  .qa-acts button { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid #44444f; background: #2c2c34; color: var(--fg); cursor: pointer; }
+  .qa-acts button.go { background: #2f6fd6; border-color: #2f6fd6; color: #fff; }
+  .qa-acts button.danger { color: #ff8a80; }
+  .qa-acts button:disabled { opacity: 0.45; cursor: default; }
+  .qa-msg { font-size: 11px; color: #9be29b; }
+  .qa-msg.bad { color: #ff8a80; }
+  .qa-mark { width: 14px; height: 14px; border-radius: 50%; background: #ff9f1c; border: 2px solid #111; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
   .maplibregl-popup-close-button { color: var(--fg); font-size: 18px; width: 28px; height: 28px; }
   /* route points: 44 px touch targets with a smaller visible dot */
   .pt { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; }
