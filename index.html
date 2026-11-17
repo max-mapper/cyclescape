@@ -66,6 +66,27 @@
   #route-meta input:focus, #route-meta textarea:focus { outline: none; border-color: var(--accent); }
   #save-state { color: var(--muted); font-size: 11px; margin: 3px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #save-state.bad { color: #ffb3a8; }
+  #stale-row { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; padding: 6px 8px; border: 1px solid #6b5a1e; border-radius: 6px; background: #2a2414; font-size: 12px; }
+  #stale-row[hidden] { display: none; }
+  #stale-row span { flex: 1; min-width: 0; }
+  #stale-row button { flex: 0 0 auto; }
+  /* a saved route's actions (the Routes page's, on the card) */
+  #saved-acts { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0 0; }
+  #saved-acts button { flex: 1 1 auto; font-size: 12px; padding: 4px 6px; white-space: nowrap; }
+  #saved-acts button.danger, #saved-extra button.danger { border-color: #a33; color: #ffb3a8; }
+  #saved-extra:empty { display: none; }
+  #saved-extra { margin: 5px 0 0; font-size: 12px; }
+  #saved-extra .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  #saved-extra input { flex: 1 1 160px; min-width: 0; font-size: 12px; font-weight: 400; }
+  #saved-extra p { margin: 3px 0; color: var(--muted); }
+  #saved-extra p.bad { color: #ffb3a8; }
+  #saved-extra .menu { display: flex; flex-direction: column; gap: 3px; }
+  #saved-extra .menu button { text-align: left; }
+  #coll-step { display: flex; align-items: center; gap: 6px; margin: 5px 0 0; font-size: 12px; color: var(--muted); }
+  #coll-step[hidden] { display: none; }
+  #coll-step span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #coll-step button { padding: 2px 10px; }
+  @media (pointer: coarse) { #saved-acts button, #coll-step button { min-height: 40px; } #saved-extra input { font-size: 16px; } }
   .sum-top { display: flex; align-items: center; gap: 8px; }
   .sum-top #sum-main { flex: 1 1 auto; min-width: 0; font-size: 14px; gap: 0 7px; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; } /* one line, 4-digit climbs too */
   #save-route { flex: 0 0 auto; padding: 4px 12px; }
@@ -344,11 +365,15 @@
       <input id="route-name" type="text" maxlength="120" autocomplete="off" aria-label="Route name" placeholder="Route name">
       <div id="save-state" role="status"></div>
       <textarea id="route-desc" rows="2" maxlength="2000" aria-label="Description" placeholder="Description (optional)"></textarea>
+      <div id="coll-step" hidden></div>
+      <div id="saved-acts"></div>
+      <div id="saved-extra"></div>
     </div>
     <div class="sum-top"><div id="sum-main">No route yet</div>
       <button id="save-route" class="primary" disabled title="Save route: in this browser, and online when you are signed in" aria-label="Save route">Save</button></div>
     <div id="route-opts" hidden title="Genuinely different route options (≤ 40% shared); tap one to select it"></div>
     <div id="sum-warn" hidden></div>
+    <div id="stale-row" hidden><span id="stale-text"></span><button id="rerun" title="Work every part out again from the same points, with the route's settings, today's routing and map data; a saved route is overwritten">Work it out again</button></div>
     <details id="route-details"><summary>Route details</summary>
       <div id="sum-det"></div>
       <div id="sum-sub"></div>
