@@ -211,8 +211,12 @@
   #route-opts .opt .c { color: var(--muted); font-size: 11px; }
   #route-opts .opt .v { grid-column: 2 / 4; color: var(--muted); font-size: 11px; }
   #route-opts .none { color: var(--muted); font-size: 11px; }
+  #route-opts .grp { color: var(--fg); font-size: 11px; font-weight: 600; letter-spacing: 0.02em; margin-top: 4px; }
   .alt-label { background: #111; color: #fff; border: 2px solid #ddd; border-radius: 10px; min-width: 18px; height: 18px; padding: 0 4px;
     font: 600 11px/14px system-ui; text-align: center; cursor: pointer; box-sizing: border-box; }
+  /* walking and stairs sections on the route: a label at each (best-route.mjs walkOf) */
+  .walk-label { background: #111; color: #fff; border: 1.5px solid #fff; border-radius: 9px; padding: 0 6px; height: 17px; font: 600 10.5px/14px system-ui; white-space: nowrap; pointer-events: none; box-sizing: border-box; }
+  .walk-label.stairs { border-color: #ff4d4d; color: #ffb3b3; }
   #best-stats { color: var(--fg); font-size: 11px; margin: 2px 0; }
   #stats { color: var(--muted); font-size: 11px; margin-top: 8px; }
   #climb-preview { width: 100%; border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; margin-top: 4px; }
