@@ -27,6 +27,7 @@
   header button { flex-shrink: 0; } /* the buttons never get pushed out of the panel */
   #logo { border-radius: 50%; } /* "Bike Path" by Iconathon, public domain (The Noun Project 6276) */
   #collapse { padding: 2px 10px; }
+  #sheet-close { display: none; }
   #status { color: var(--accent); margin: 4px 0 6px; min-height: 1.4em; }
   [hidden] { display: none !important; } /* hidden always wins, whatever display a layout rule gives the element */
   #retry { margin: -2px 0 6px; padding: 3px 10px; }
@@ -148,6 +149,13 @@
   option:disabled { color: #666; }
   details { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 6px; }
   summary { cursor: pointer; color: var(--muted); padding: 4px 0; }
+  /* Party Pace settings: one box, in groups; open, the map shows each road's cost (cost view) */
+  #pp-box { margin: 4px 0 8px; }
+  #pp-box > summary { font-weight: 600; }
+  #pp-box .grp-h { color: var(--fg); font-size: 11px; font-weight: 600; margin: 10px 0 2px; padding-top: 6px; border-top: 1px solid var(--line); }
+  #cost-legend { margin: 4px 0 2px; }
+  #cost-legend .bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg,#2dd4bf 0%,#22c55e 20%,#facc15 46%,#f97316 73%,#dc2626 100%); }
+  #cost-legend .ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
   #legend { margin: 2px 0 8px; }
   #legend .bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg,#000004,#1f0c48,#550f6d,#88226a,#ba3655,#e35933,#f98c0a,#fcffa4); }
   #legend .ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
@@ -190,7 +198,6 @@
   .pack-row { margin: 2px 0; } .pack-row span { flex: 1; } .pack-row button { flex: 0 0 40px; }
   #prefs { margin-bottom: 4px; }
   label.busy .ends { grid-column: 1 / -1; display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: -2px; }
-  #climb-custom[hidden] { display: none; }
   #grade-legend { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 8px; font-size: 10px; color: var(--muted); align-items: center; }
   #grade-legend i { display: inline-block; width: 14px; height: 5px; border-radius: 2px; margin-right: 3px; vertical-align: middle; border: 1px solid #fff6; }
   #grade-legend:empty { display: none; }
@@ -203,17 +210,23 @@
   #lod-chip[hidden] { display: none; }
   #route-opts { margin: 6px 0 2px; display: grid; gap: 4px; }
   #route-opts[hidden] { display: none; }
-  #route-opts .opt { display: grid; grid-template-columns: 3.6em 1fr auto; gap: 2px 8px; align-items: baseline; text-align: left;
+  /* an option: its name and how it differs on the first line, its numbers under them */
+  #route-opts .opt { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: baseline; text-align: left;
     background: #26262c; border: 1px solid #3a3a44; border-radius: 6px; padding: 5px 8px; font-size: 12px; color: var(--fg); cursor: pointer; }
   #route-opts .opt.on { border-color: #fff; background: #34343c; }
-  #route-opts .opt b { font-size: 12px; }
-  #route-opts .opt .m { color: var(--fg); }
-  #route-opts .opt .c { color: var(--muted); font-size: 11px; }
-  #route-opts .opt .v { grid-column: 2 / 4; color: var(--muted); font-size: 11px; }
+  #route-opts .opt b { font-size: 12px; white-space: nowrap; }
+  #route-opts .opt .m { grid-column: 1 / 3; grid-row: 2; color: var(--fg); }
+  #route-opts .opt .c { text-align: right; color: var(--muted); font-size: 11px; }
+  #route-opts .opt .v { grid-column: 1 / 3; color: var(--muted); font-size: 11px; }
+  /* a greyed alternative (another quiet way, the way through the tunnels) */
+  #route-opts .opt.minor { background: transparent; border-style: dashed; padding: 3px 8px; }
+  #route-opts .opt.minor:not(.on), #route-opts .opt.minor:not(.on) .m { color: var(--muted); }
+  #route-opts .opt.minor b { font-weight: 500; }
   #route-opts .none { color: var(--muted); font-size: 11px; }
   #route-opts .grp { color: var(--fg); font-size: 11px; font-weight: 600; letter-spacing: 0.02em; margin-top: 4px; }
   .alt-label { background: #111; color: #fff; border: 2px solid #ddd; border-radius: 10px; min-width: 18px; height: 18px; padding: 0 4px;
-    font: 600 11px/14px system-ui; text-align: center; cursor: pointer; box-sizing: border-box; }
+    font: 600 11px/14px system-ui; text-align: center; cursor: pointer; box-sizing: border-box; white-space: nowrap; }
+  .alt-label.minor { background: #1c1c20; color: #a8a8b0; border-color: #6a6a72; font-weight: 500; }
   /* walking and stairs sections on the route: a label at each (best-route.mjs walkOf) */
   .walk-label { background: #111; color: #fff; border: 1.5px solid #fff; border-radius: 9px; padding: 0 6px; height: 17px; font: 600 10.5px/14px system-ui; white-space: nowrap; pointer-events: none; box-sizing: border-box; }
   .walk-label.stairs { border-color: #ff4d4d; color: #ffb3b3; }
@@ -305,8 +318,10 @@
     header { margin: 0 0 4px; } header h1, #logo, #collapse { display: none; } header { justify-content: flex-end; }
     #panel:not(.expanded) header, #panel:not(.expanded) .search-row, #panel:not(.expanded) #mode-hint { display: none; }
     #place-q { font-size: 16px; }
+    body.cost-view #panel { max-height: 50vh; } /* the road costs on the map stay in sight above the settings */
     #panel.collapsed { width: auto; }
-    #handle { display: flex; justify-content: center; align-items: center; height: 26px; margin: 0 -12px; cursor: grab; touch-action: none; }
+    #handle { display: flex; justify-content: center; align-items: center; height: 40px; margin: 0 -12px -6px; cursor: grab; touch-action: none; }
+    #sheet-close { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; padding: 0; }
     #handle > span { width: 42px; height: 5px; border-radius: 3px; background: #666; }
     #status { margin-top: 0; }
     .toolbar button { font-size: 13px; padding: 4px 2px; }
@@ -332,7 +347,8 @@
   <header><img id="logo" src="icon-64.png" width="22" height="22" alt=""><h1>CycleScape</h1>
     <button id="routes-btn" class="hbtn" title="Your routes: save, open, share">★ Routes</button>
     <button id="account-btn" class="hbtn" hidden title="Sign in with Google to keep your routes online and share them">Sign in</button>
-    <button id="collapse" title="Hide the panel" aria-label="Hide the panel" aria-expanded="true">–</button></header>
+    <button id="collapse" title="Hide the panel" aria-label="Hide the panel" aria-expanded="true">–</button>
+    <button id="sheet-close" title="Close" aria-label="Close"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M3 6 L8 11 L13 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></header>
   <div class="tabs" role="tablist" aria-label="What to do">
     <button id="mode-pair" class="on" role="tab" aria-selected="true" title="Plan a route from a start to an end">Plan a route</button>
     <button id="mode-omni" role="tab" aria-selected="false" title="Rate every road in a box you draw: trips run between all the places in it">Rate an area</button>
@@ -400,22 +416,40 @@
   </div>
 
   <div id="prefs">
-    <label class="pair-only">Max detour <output id="o-detour-max"></output><input id="detour-max" type="range" min="0" max="105" step="5" value="30"></label>
-    <label class="busy" title="How strongly to avoid busy roads (estimated vehicles/day and truck share)">Avoid busy roads <output id="o-tau"></output>
-      <input id="tau" type="range" min="0.2" max="0.9" step="0.05" value="0.7"><span class="ends"><span>Don't mind</span><span>Strongly avoid</span></span></label>
-    <p class="hint" id="tau-readout"></p>
-    <p class="hint" id="traffic-rough" hidden>Traffic here is a rough estimate from the road types.</p>
-    <label class="busy pair-only" title="Route complexity: every turn and junction costs extra (right turns and unsignalised crossings of busy roads most), so the route stays simple unless a twisty one is clearly quieter. 0 = ignore turns">Simple routes <output id="o-turns"></output>
-      <input id="turns" type="range" min="0" max="2" step="0.1" value="1"><span class="ends"><span>Ignore turns</span><span>Fewest turns</span></span></label>
-    <label class="haz" title="Keeps routes out of tunnels unless there is no other way within the detour limit"><input type="checkbox" id="avoid-tunnels" checked> Avoid tunnels</label>
-    <label class="haz" title="Narrow lanes under 3 m, footpaths (徒歩道) and park paths (庭園路). The map data cannot tell which have bollards, steps or no-bike signs. On: used like any quiet road (footpaths cost a bit more). Off: avoided unless there is no other way"><input type="checkbox" id="walkways" checked> Walkways and narrow lanes</label>
-    <div class="row"><span class="lbl">Rider</span><select id="profile" title="Climbing preference: how much you mind climbs and steep pitches"></select></div>
-    <div id="climb-custom" hidden>
+    <!-- every Party Pace setting in one place; open, the map shows what Party Pace pays on each road (app.mjs cost view) -->
+    <details id="pp-box">
+      <summary><span class="pair-only">Party Pace settings</span><span class="omni-only">Route settings</span></summary>
+      <div class="row"><span class="lbl">Rider</span><select id="profile" title="A preset, or Custom: your own settings"></select></div>
+      <p class="hint one" id="profile-hint">Change anything below and it becomes Custom.</p>
+      <p class="hint one pair-only">Fastest ignores these, except roads you avoid.</p>
+      <div id="cost-legend"><div class="bar"></div><div class="ends"><span>×0.6</span><span>×1</span><span>×2</span><span>×4</span><span>×8+</span></div>
+        <p class="hint one" id="cost-hint">Map: cost per km. Tap a road for its parts.</p></div>
+      <div class="grp-h">Route</div>
+      <label class="pair-only">Max detour <output id="o-detour-max"></output><input id="detour-max" type="range" min="0" max="105" step="5" value="30"></label>
+      <label class="busy pair-only" title="Route complexity: every turn and junction costs extra (right turns and unsignalised crossings of busy roads most), so the route stays simple unless a twisty one is clearly quieter. 0 = ignore turns">Simple routes <output id="o-turns"></output>
+        <input id="turns" type="range" min="0" max="2" step="0.1" value="1"><span class="ends"><span>Ignore turns</span><span>Fewest turns</span></span></label>
+      <label class="haz" title="Keeps routes out of tunnels unless there is no other way within the detour limit"><input type="checkbox" id="avoid-tunnels" checked> Avoid tunnels</label>
+      <label class="haz" title="Narrow lanes under 3 m, footpaths (徒歩道) and park paths (庭園路). The map data cannot tell which have bollards, steps or no-bike signs. On: used like any quiet road (footpaths cost a bit more). Off: avoided unless there is no other way"><input type="checkbox" id="walkways" checked> Walkways and narrow lanes</label>
+      <div class="grp-h">Traffic</div>
+      <label class="busy" title="How strongly to avoid busy roads (estimated vehicles/day and truck share)">Avoid busy roads <output id="o-tau"></output>
+        <input id="tau" type="range" min="0.2" max="0.9" step="0.05" value="0.7"><span class="ends"><span>Don't mind</span><span>Strongly avoid</span></span></label>
+      <p class="hint" id="tau-readout"></p>
+      <p class="hint" id="traffic-rough" hidden>Traffic here is a rough estimate from the road types.</p>
+      <div class="grp-h">Climbing</div>
       <label>Detour to skip 100 m of climbing <output id="o-detour"></output><input id="detour" type="range" min="0" max="3" step="0.1" value="1"></label>
       <label>Comfortable grade <output id="o-g0"></output><input id="g0" type="range" min="0" max="10" step="0.5" value="1"></label>
       <label>Steep penalty scale <output id="o-steep"></output><input id="steep" type="range" min="1" max="8" step="0.5" value="3.5"></label>
-    </div>
-    <table id="climb-preview" title="Resistance multiplier by grade for this rider profile"></table>
+      <table id="climb-preview" title="Resistance multiplier by grade for this rider profile"></table>
+      <div class="grp-h">Road types</div>
+      <p class="hint one">×0.5 prefer … ×3 avoid, on top of traffic and climbing.</p>
+      <div id="typepref"></div>
+      <label>Unpaved × <output id="o-unpaved"></output><input id="unpaved" type="range" min="0.6" max="2" step="0.05" value="1"></label>
+      <div class="grp-h">Bike paths alongside roads</div>
+      <label id="bike-sep-row" title="Cost of a road with a dedicated cycleway alongside (OSM), like a road type: the traffic beside it no longer counts. Default x0.8 = same as a cycleway">Cycleway alongside × <output id="o-bike-sep"></output><input id="bike-sep" type="range" min="0.5" max="3" step="0.05" value="0.8"></label>
+      <label id="bike-shared-row" title="Cost of a road with a shared sidewalk/path alongside (OSM footway or path that allows bikes, e.g. 自転車歩行者道): out of traffic but shared with pedestrians and crossed by driveways. Replaces the traffic penalty. Default x1.5">Shared sidewalk alongside × <output id="o-bike-shared"></output><input id="bike-shared" type="range" min="0.5" max="3" step="0.05" value="1.5"></label>
+      <label id="bike-lane-row" title="Share of the road's traffic penalty that still counts on a painted bike lane (OSM)">Painted bike lane: traffic penalty kept <output id="o-bike-lane"></output><input id="bike-lane" type="range" min="0" max="100" step="5" value="50"></label>
+      <p class="hint" id="bike-none" hidden>No OSM bike facilities alongside roads in this data.</p>
+    </details>
     <label class="haz pair-only"><input type="checkbox" id="cur-on"> Colour the roads good routes use</label>
     <p class="hint pair-only" style="margin-top:0">Brighter roads carry more of the good ways from start to end.</p>
     <div id="legend" hidden><div class="bar"></div><div class="ends"><span>few good routes</span><span>many (safer, well connected)</span></div></div>
@@ -427,18 +461,6 @@
       <p class="hint" id="width-used">The search width follows each Automatic segment's length: 0.17 × the distance between its two points (1.5 to 25 km either side), so a 100 km segment looks 17 km either side.</p>
       <div id="stats"></div>
     </details>
-
-    <details id="typepref-box">
-      <summary>Road type preferences</summary>
-      <p class="hint">Your taste in road types, on top of traffic and climbing: ×0.5 prefer … ×3 avoid.</p>
-      <div id="typepref"></div>
-      <label>Unpaved × <output id="o-unpaved"></output><input id="unpaved" type="range" min="0.6" max="2" step="0.05" value="1"></label>
-      <label id="bike-sep-row" title="Cost of a road with a dedicated cycleway alongside (OSM), like a road type: the traffic beside it no longer counts. Default x0.8 = same as a cycleway">Cycleway alongside × <output id="o-bike-sep"></output><input id="bike-sep" type="range" min="0.5" max="3" step="0.05" value="0.8"></label>
-      <label id="bike-shared-row" title="Cost of a road with a shared sidewalk/path alongside (OSM footway or path that allows bikes, e.g. 自転車歩行者道): out of traffic but shared with pedestrians and crossed by driveways. Replaces the traffic penalty. Default x1.5">Shared sidewalk alongside × <output id="o-bike-shared"></output><input id="bike-shared" type="range" min="0.5" max="3" step="0.05" value="1.5"></label>
-      <label id="bike-lane-row" title="Share of the road's traffic penalty that still counts on a painted bike lane (OSM)">Painted bike lane: traffic penalty kept <output id="o-bike-lane"></output><input id="bike-lane" type="range" min="0" max="100" step="5" value="50"></label>
-      <div class="row"><button id="typepref-reset">Reset to defaults</button></div>
-    </details>
-
 
     <details>
       <summary>Map layers</summary>
